@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"go-jwt-auth/utils"
 	"net/http"
 	"strings"
@@ -22,15 +21,35 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		token, err := utils.ValidateToken(tokenString)
 
-		if err != nil || !token.Valid {
-			fmt.Println(token.Valid)
+		if err != nil {
 
 			utils.Error(ctx, http.StatusUnauthorized, "token tidak valid")
 
 			ctx.Abort()
 			return
 		}
-		ctx.Next()
-	}
 
+		ctx.Set("user_id", token.UserID)
+		ctx.Set("email", token.Email)
+		ctx.Set("user_role", token.Role)
+
+		ctx.Next()
+
+	}
+}
+
+func AdminOnlyMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		role := ctx.GetString("user_role")
+
+		if role != utils.RoleAdmin {
+			utils.Error(ctx, 401, "error")
+			ctx.Abort()
+
+			return
+		}
+
+		ctx.Next()
+
+	}
 }

@@ -1,8 +1,10 @@
 package routes
 
 import (
+	"go-jwt-auth/config"
 	"go-jwt-auth/handler"
 	"go-jwt-auth/middleware"
+	"go-jwt-auth/model"
 	"go-jwt-auth/repository"
 	"go-jwt-auth/service"
 
@@ -25,4 +27,19 @@ func SetupRoutes(r *gin.Engine) {
 	r.GET("/test", func(ctx *gin.Context) {
 		ctx.JSON(200, "hai")
 	})
+
+	admin := r.Group("/admin")
+	admin.Use(middleware.AuthMiddleware(), middleware.AdminOnlyMiddleware())
+	{
+		admin.GET("/users", func(ctx *gin.Context) {
+			// Akses data user hanya untuk admin
+			var users []model.User
+			if err := config.DB.Find(&users).Error; err != nil {
+				ctx.JSON(500, gin.H{"error": "failed to fetch users"})
+				return
+			}
+			ctx.JSON(200, gin.H{"data": users})
+		})
+	}
+
 }
