@@ -17,7 +17,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-
+ 
 		tokenString := strings.TrimSpace(strings.Replace(authHeader, "Bearer", "", 1))
 
 		token, err := utils.ValidateToken(tokenString)
