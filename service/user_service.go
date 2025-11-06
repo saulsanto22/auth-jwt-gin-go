@@ -65,7 +65,7 @@ func (s *UserService) CreateUser(user *model.User) error {
 	return s.userRepository.CreateUser(user)
 }
 
-func (s *UserService) GetById(id uint) (model.User, error) {
+func (s *UserService) GetById(id uint) (*model.User, error) {
 	return s.userRepository.FindByID(id)
 }
 

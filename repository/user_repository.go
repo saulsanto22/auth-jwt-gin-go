@@ -16,12 +16,12 @@ func (r *UserRepository) FindAll(user *[]model.User) error {
 
 }
 
-func (r *UserRepository) FindByID(id uint) (model.User, error) {
+func (r *UserRepository) FindByID(id uint) (*model.User, error) {
 
 	var user model.User
 
 	err := config.DB.First(&user, id).Error
-	return user, err
+	return &user, err
 
 }
 
@@ -42,7 +42,7 @@ func (r *UserRepository) FindByEmail(email string) (model.User, error) {
 	return user, err
 }
 
-func (r *UserRepository) DeleteUser(id uint) ( error) {
+func (r *UserRepository) DeleteUser(id uint) error {
 
 	var user model.User
 	return config.DB.Delete(&user, id).Error
