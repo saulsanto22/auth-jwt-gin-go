@@ -19,9 +19,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/login", authHandler.Login)
 
 	auth := r.Group("/auth", middleware.AuthMiddleware())
-	auth.GET("/profile", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{"msg": "ini setelah login!"})
-	})
+	auth.GET("/profile")
 
 	r.GET("/test", func(ctx *gin.Context) {
 		ctx.JSON(200, "hai")

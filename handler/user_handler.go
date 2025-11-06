@@ -64,7 +64,7 @@ func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 	// Update data user
 	user.Nama = input.Nama
 	user.Email = input.Email
-	err = h.userService.UpdateUser(&user)
+	err = h.userService.UpdateUser(user)
 	if err != nil {
 		utils.Error(ctx, http.StatusInternalServerError, "Gagal memperbarui user")
 		return

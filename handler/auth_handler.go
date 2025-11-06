@@ -51,3 +51,54 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 	utils.Success(ctx, gin.H{"token": token}, "Berhasil!")
 
 }
+
+func (h *AuthHandler) GetProfile(ctx *gin.Context) {
+	UserID, err := utils.CheckContext[uint](ctx, "user_id")
+	if err != nil {
+		utils.Error(ctx, http.StatusUnauthorized, "User tidak ditemukan!")
+		return
+	}
+
+	user, err := h.userService.GetById(UserID)
+	if err != nil {
+		utils.Error(ctx, http.StatusUnauthorized, "User tidak ditemukan!")
+		return
+	}
+
+	utils.Success(ctx, user, "profile")
+}
+func (h *AuthHandler) UpdateProfile(ctx *gin.Context) {
+	UserID, err := utils.CheckContext[uint](ctx, "user_id")
+	if err != nil {
+		utils.Error(ctx, http.StatusUnauthorized, "User tidak ditemukan!")
+		return
+	}
+	var input model.User
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		utils.Error(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	user, err := h.userService.GetById(UserID)
+
+	if err != nil {
+		utils.Error(ctx, http.StatusNotFound, "User tidak ditemukan")
+		return
+	}
+
+	if input.Nama != "" {
+		user.Nama = input.Nama
+	}
+
+	if input.Email != "" {
+		user.Email = input.Email
+	}
+
+	err = h.userService.UpdateUser(user)
+	if err != nil {
+		utils.Error(ctx, http.StatusInternalServerError, "Gagal memperbarui profil")
+		return
+	}
+
+	utils.Success(ctx, user, "data behasil diubah!")
+}

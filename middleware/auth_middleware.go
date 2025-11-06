@@ -19,19 +19,18 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		tokenString := strings.TrimSpace(strings.Replace(authHeader, "Bearer", "", 1))
 
-		token, err := utils.ValidateToken(tokenString)
+		claims, err := utils.ValidateToken(tokenString)
 
 		if err != nil {
-
 			utils.Error(ctx, http.StatusUnauthorized, "token tidak valid")
 
 			ctx.Abort()
 			return
 		}
 
-		ctx.Set("user_id", token.UserID)
-		ctx.Set("email", token.Email)
-		ctx.Set("user_role", token.Role)
+		ctx.Set("user_id", claims.UserID)
+		ctx.Set("email", claims.Email)
+		ctx.Set("user_role", claims.Role)
 
 		ctx.Next()
 
@@ -43,7 +42,7 @@ func AdminOnlyMiddleware() gin.HandlerFunc {
 		role := ctx.GetString("user_role")
 
 		if role != utils.RoleAdmin {
-			utils.Error(ctx, 401, "error")
+			utils.Error(ctx, http.StatusForbidden, "tidak ada akses!")
 			ctx.Abort()
 
 			return
