@@ -14,7 +14,11 @@ type UserHandler struct {
 	userService *service.UserService
 }
 
-func (h *AuthHandler) GetUserByID(ctx *gin.Context) {
+func NewUserHandler(s *service.UserService) *UserHandler {
+	return &UserHandler{s}
+}
+
+func (h *UserHandler) GetUserByID(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
 	user, err := h.userService.GetById(uint(id))
 	if err != nil {
@@ -25,7 +29,7 @@ func (h *AuthHandler) GetUserByID(ctx *gin.Context) {
 }
 
 // CreateUser untuk menambahkan user baru
-func (h *AuthHandler) CreateUser(ctx *gin.Context) {
+func (h *UserHandler) CreateUser(ctx *gin.Context) {
 	var input model.User
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		utils.Error(ctx, http.StatusBadRequest, err.Error())
@@ -42,7 +46,7 @@ func (h *AuthHandler) CreateUser(ctx *gin.Context) {
 }
 
 // UpdateUser untuk memperbarui data user
-func (h *AuthHandler) UpdateUser(ctx *gin.Context) {
+func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
 	var input model.User
 
@@ -70,7 +74,7 @@ func (h *AuthHandler) UpdateUser(ctx *gin.Context) {
 }
 
 // DeleteUser untuk menghapus user
-func (h *AuthHandler) DeleteUser(ctx *gin.Context) {
+func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
 
 	err := h.userService.Delete(uint(id))
