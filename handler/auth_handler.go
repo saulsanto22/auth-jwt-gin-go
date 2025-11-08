@@ -20,14 +20,24 @@ func NewAuthHandler(userService *service.UserService) *AuthHandler {
 }
 
 func (h *AuthHandler) Register(ctx *gin.Context) {
-	var input model.User
+	var input model.RegisterRequest
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		utils.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := h.userService.Register(&input); err != nil {
+	if !utils.ValidateStruct(ctx, &input) {
+		return
+	}
+
+	user := model.User{
+		Nama:     input.Nama,
+		Email:    input.Email,
+		Password: input.Password,
+	}
+
+	if err := h.userService.Register(&user); err != nil {
 		utils.Error(ctx, http.StatusBadRequest, err.Error())
 
 		return
@@ -36,10 +46,14 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 	utils.Success(ctx, gin.H{"message": "Registrasi berhasil"}, "")
 }
 func (h *AuthHandler) Login(ctx *gin.Context) {
-	var input model.User
+	var input model.LoginRequest
 	fmt.Println(input)
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		utils.Error(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if !utils.ValidateStruct(ctx, &input) {
 		return
 	}
 	token, err := h.userService.Login(input.Email, input.Password)
@@ -73,7 +87,7 @@ func (h *AuthHandler) UpdateProfile(ctx *gin.Context) {
 		utils.Error(ctx, http.StatusUnauthorized, "User tidak ditemukan!")
 		return
 	}
-	var input model.User
+	var input model.UpdateUser
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		utils.Error(ctx, http.StatusBadRequest, err.Error())
 		return
@@ -86,14 +100,9 @@ func (h *AuthHandler) UpdateProfile(ctx *gin.Context) {
 		return
 	}
 
-	if input.Nama != "" {
-		user.Nama = input.Nama
+	if !utils.ValidateStruct(ctx, input) {
+		return
 	}
-
-	if input.Email != "" {
-		user.Email = input.Email
-	}
-
 	err = h.userService.UpdateUser(user)
 	if err != nil {
 		utils.Error(ctx, http.StatusInternalServerError, "Gagal memperbarui profil")
