@@ -90,12 +90,37 @@ func NewService(userService *service.UserService) *UserHandler {
 }
 
 func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
-	users, err := h.userService.GetAllUsers()
+
+	pageString := ctx.DefaultQuery("page", "1")
+	limitString := ctx.DefaultQuery("limit", "10")
+	search := ctx.DefaultQuery("search", "")
+	role := ctx.DefaultQuery("role", "")
+	sortBy := ctx.DefaultQuery("sort_by", "id")
+	order := ctx.DefaultQuery("order", "asc")
+
+	page, err := strconv.Atoi(pageString)
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(limitString)
+
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+	users, total, err := h.userService.GetAllUsers(page, limit, search, role, sortBy, order)
 
 	if err != nil {
 		utils.Error(ctx, http.StatusInternalServerError, "Gagal mengambil data users")
 		return
 	}
 
-	utils.Success(ctx, users, "Data Berhasil!")
+	utils.Success(ctx, gin.H{
+		"users": users,
+		"meta": gin.H{
+			"total": total,
+			"page":  page,
+			"limit": limit,
+		},
+	}, "Data users berhasil diambil")
 }

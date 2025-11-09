@@ -32,8 +32,10 @@ func ValidateStruct(ctx *gin.Context, s interface{}) bool {
 				msg = fmt.Sprintf("field %s must be at least %s characters long", fieldErr.Field(), fieldErr.Param())
 			case "max":
 				msg = fmt.Sprintf("field %s must be at most %s characters long", fieldErr.Field(), fieldErr.Param())
+			
 			default:
 				msg = fmt.Sprintf("field %s is invalid", fieldErr.Field())
+
 
 			}
 

@@ -28,7 +28,7 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 	}
 
 	if !utils.ValidateStruct(ctx, &input) {
-		return
+		return	
 	}
 
 	user := model.User{

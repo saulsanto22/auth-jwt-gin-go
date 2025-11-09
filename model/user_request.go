@@ -1,8 +1,8 @@
 package model
 
 type RegisterRequest struct {
-	Nama     string `json:"name" validate:"required, min=3,max=50"`
-	Email    string `json:"email" validate:"required,email"`
+	Nama     string `json:"nama" validate:"required,min=3,max=50"`
+	Email    string `gorm:"uniqueIndex" json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6"`
 }
 

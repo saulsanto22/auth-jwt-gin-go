@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"go-jwt-auth/config"
 	"go-jwt-auth/model"
 )
@@ -11,8 +12,48 @@ func NewRepository() *UserRepository {
 	return &UserRepository{}
 }
 
-func (r *UserRepository) FindAll(user *[]model.User) error {
-	return config.DB.Find(user).Error
+func (r *UserRepository) FindAll(page, limit int, search, role, sortBy, order string) ([]model.User, int64, error) {
+	var users []model.User
+	var total int64
+
+	q := config.DB.Model(&model.User{})
+
+	if search != "" {
+		q = q.Where("nama LIKE ? OR email LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	if role != "" {
+		q = q.Where("role = ?", role)
+	}
+
+	//validasi col sort
+	allowedSort := map[string]bool{
+		"id":         true,
+		"nama":       true,
+		"email":      true,
+		"created_at": true,
+	}
+
+	if !allowedSort[sortBy] {
+		sortBy = "id"
+	}
+
+	if order != "asc" && order != "desc" {
+		order = "asc"
+	}
+	q.Count(&total)
+
+	offset := (page - 1) * limit
+	err := q.Order(fmt.Sprintf("%s %s", sortBy, order)).
+		Limit(limit).
+		Offset(offset).
+		Find(&config.DB.ClauseBuilders).Error
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return users, total, nil
 
 }
 
@@ -35,11 +76,11 @@ func (r *UserRepository) UpdateUser(user *model.User) error {
 
 }
 
-func (r *UserRepository) FindByEmail(email string) (model.User, error) {
+func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 	var user model.User
 	err := config.DB.Where("email =?", email).First(&user).Error
 
-	return user, err
+	return &user, err
 }
 
 func (r *UserRepository) DeleteUser(id uint) error {

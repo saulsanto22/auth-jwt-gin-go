@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"go-jwt-auth/model"
 	"go-jwt-auth/repository"
 	"go-jwt-auth/utils"
@@ -18,9 +19,17 @@ func NewUserService(repo *repository.UserRepository) *UserService {
 }
 func (s *UserService) Register(user *model.User) error {
 
+	existingUser, _ := s.userRepository.FindByEmail(user.Email)
+
+	fmt.Println(existingUser)
+
+	if existingUser != nil && existingUser.ID != 0 {
+		return errors.New("email sudah terdaftar")
+	}
 	if user.Role == "" {
 		user.Role = utils.RoleUser
 	}
+
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	if err != nil {
@@ -54,11 +63,9 @@ func (s *UserService) Login(email, password string) (string, error) {
 
 }
 
-func (s *UserService) GetAllUsers() ([]model.User, error) {
+func (s *UserService) GetAllUsers(page, limit int, search, role, sortBy, order string) ([]model.User, int64, error) {
 
-	var users []model.User
-	err := s.userRepository.FindAll(&users)
-	return users, err
+	return s.userRepository.FindAll(page, limit, search, role, sortBy, order)
 }
 
 func (s *UserService) CreateUser(user *model.User) error {

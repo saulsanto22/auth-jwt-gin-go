@@ -28,16 +28,6 @@ func SetupRoutes(r *gin.Engine) {
 	admin := r.Group("/admin")
 	admin.Use(middleware.AuthMiddleware(), middleware.AdminOnlyMiddleware())
 	{
-		// admin.GET("/users", func(ctx *gin.Context) {
-		// 	// Akses data user hanya untuk admin
-		// 	var users []model.User
-		// 	if err := config.DB.Find(&users).Error; err != nil {
-		// 		ctx.JSON(500, gin.H{"error": "failed to fetch users"})
-		// 		return
-		// 	}
-		// 	ctx.JSON(200, gin.H{"data": users})
-		// })
-
 		admin.GET("users/", adminHandler.GetAllUsers)
 		admin.GET("users/:id", adminHandler.GetUserByID)
 		admin.POST("user", adminHandler.CreateUser)
@@ -45,4 +35,13 @@ func SetupRoutes(r *gin.Engine) {
 		admin.DELETE("user/:id", adminHandler.DeleteUser)
 	}
 
+	user := r.Group("/user")
+	user.Use(middleware.AuthMiddleware())
+	{
+		user.GET("users/", adminHandler.GetAllUsers)
+		user.GET("users/:id", adminHandler.GetUserByID)
+		user.POST("user", adminHandler.CreateUser)
+		user.PUT("user/:id", adminHandler.UpdateUser)
+		user.DELETE("user/:id", adminHandler.DeleteUser)
+	}
 }
