@@ -1,0 +1,32 @@
+    name: Go CI
+
+    on:
+      push:
+        branches:
+          - main # Trigger on pushes to the main branch
+      pull_request:
+        branches:
+          - main # Trigger on pull requests targeting the main branch
+
+    jobs:
+      build-and-test:
+        runs-on: ubuntu-latest # Specify the runner environment
+
+        steps:
+          - name: Checkout Code
+            uses: actions/checkout@v4 # Action to check out your repository code
+
+          - name: Set up Go
+            uses: actions/setup-go@v5
+            with:
+              go-version: '1.22' # Specify the Go version to use
+
+          - name: Build
+            run: go build -v ./... # Build your Go application
+
+          - name: Run Tests
+            run: go test -v ./... # Run your Go tests
+
+          # Optional: Add steps for linting, static analysis, or other checks
+          # - name: Run Go Linter
+          #   run: go vet ./...
